@@ -1,0 +1,31 @@
+module leftover-config {
+
+  namespace "http://example.com/leftover-config";
+  prefix leftover-config;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  list leftover-config {
+
+    key name;
+    leaf name {
+      tailf:info "Unique service id";
+      tailf:cli-allow-range;
+      type leafref {
+        path "/ncs:devices/ncs:device/ncs:name";
+      }
+    }
+
+    uses ncs:service-data;
+    ncs:servicepoint leftover-config-servicepoint;
+
+  }
+}

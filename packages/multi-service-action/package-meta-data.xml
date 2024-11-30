@@ -1,0 +1,18 @@
+<ncs-package xmlns="http://tail-f.com/ns/ncs-packages">
+  <name>multi-service-action</name>
+  <package-version>1.0</package-version>
+  <description>Package containing reusable action to invoke multiple service actions in one call.</description>
+  <ncs-min-version>6.3</ncs-min-version>
+
+  <required-package>
+    <name>maagic-copy</name>
+  </required-package>
+
+  <component>
+    <name>main</name>
+    <application>
+      <python-class-name>multi_service_action.main.Main</python-class-name>
+    </application>
+  </component>
+
+</ncs-package>

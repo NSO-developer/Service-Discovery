@@ -1,0 +1,11 @@
+--- /dev/fd/63	2024-10-07 10:09:21
++++ ../packages/netinfra-rfs/python/netinfra_rfs/nodes_router.py	2024-10-07 10:09:16
+@@ -208,6 +208,8 @@
+             vrf_if.ipv4_prefix_length = ipv4_prefix_length
+             vrf_if.remote.device = result.group(2)
+             vrf_if.remote.interface = result.group(3)
++            if iface.mtu is not None:
++                vrf_if.mtu = iface.mtu
+ 
+     def find_vrf(self, device, service):
+         for instance in device.routing_instances.instance:

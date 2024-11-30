@@ -1,0 +1,38 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device tags="nocreate">
+            <name>{../name}</name>
+            <config tags="merge">
+                <configuration xmlns="http://xml.juniper.net/xnm/1.1/xnm">
+                    <interfaces>
+                        <interface>
+                            <name>{/name}</name>
+                            <description>Customer Access Interface</description>
+                            <flexible-vlan-tagging/>
+                            <unit>
+                                <!-- TODO: use tagged interface!? -->
+                                <name>0</name>
+                                <description>Customer VRF {/vrf} {/remote/device} [{/remote/interface}]</description>
+                                <family>
+                                    <inet>
+                                        <address>
+                                            <name>{/ipv4-address}/{/ipv4-prefix-length}</name>
+                                        </address>
+                                    </inet>
+                                </family>
+                            </unit>
+                        </interface>
+                    </interfaces>
+                    <routing-instances>
+                        <instance>
+                            <name>{/vrf}</name>
+                            <interface>
+                                <name>{/name}</name>
+                            </interface>
+                        </instance>
+                    </routing-instances>
+                </configuration>
+            </config>
+        </device>
+    </devices>
+</config-template>

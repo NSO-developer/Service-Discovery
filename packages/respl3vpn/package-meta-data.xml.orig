@@ -1,0 +1,14 @@
+<ncs-package xmlns="http://tail-f.com/ns/ncs-packages">
+  <name>respl3vpn</name>
+  <package-version>1.0</package-version>
+  <description>L3VPN CFS</description>
+  <ncs-min-version>6.2</ncs-min-version>
+
+  <component>
+    <name>l3vpn</name>
+    <application>
+      <python-class-name>respl3vpn.l3vpn.Main</python-class-name>
+    </application>
+  </component>
+
+</ncs-package>

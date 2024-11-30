@@ -1,0 +1,16 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+  <nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm">
+    <groups>
+      <group>
+        <name>ncsadmin</name>
+        <user-name>admin</user-name>
+        <user-name>private</user-name>
+      </group>
+    </groups>
+  </nacm>
+  <python-vm xmlns="http://tail-f.com/ns/ncs">
+    <logging>
+      <level>level-debug</level>
+    </logging>
+  </python-vm>
+</config>

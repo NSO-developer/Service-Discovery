@@ -1,0 +1,39 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+  <resource-pools xmlns="http://tail-f.com/pkg/resource-allocator">
+    <id-pool xmlns="http://tail-f.com/pkg/id-allocator">
+      <name>router-id</name>
+      <range>
+        <start>1</start>
+        <end>1000</end>
+      </range>
+    </id-pool>
+    <ip-address-pool xmlns="http://tail-f.com/pkg/ipaddress-allocator">
+      <name>ipv4-loopback</name>
+      <subnet>
+        <address>10.0.0.0</address>
+        <cidrmask>24</cidrmask>
+      </subnet>
+    </ip-address-pool>
+    <ip-address-pool xmlns="http://tail-f.com/pkg/ipaddress-allocator">
+      <name>ipv6-loopback</name>
+      <subnet>
+        <address>2001:db8::</address>
+        <cidrmask>64</cidrmask>
+      </subnet>
+    </ip-address-pool>
+    <ip-address-pool xmlns="http://tail-f.com/pkg/ipaddress-allocator">
+      <name>ipv4-backbone-link</name>
+      <subnet>
+        <address>10.0.1.0</address>
+        <cidrmask>24</cidrmask>
+      </subnet>
+    </ip-address-pool>
+    <ip-address-pool xmlns="http://tail-f.com/pkg/ipaddress-allocator">
+      <name>ipv6-backbone-link</name>
+      <subnet>
+        <address>2001:db8:1::</address>
+        <cidrmask>64</cidrmask>
+      </subnet>
+    </ip-address-pool>
+  </resource-pools>
+</config>

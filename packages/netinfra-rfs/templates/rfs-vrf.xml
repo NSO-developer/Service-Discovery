@@ -1,0 +1,34 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device tags="nocreate">
+            <name>{../name}</name>
+            <config tags="merge">
+                <configuration xmlns="http://xml.juniper.net/xnm/1.1/xnm">
+                    <routing-instances>
+                        <instance>
+                            <name>{/name}</name>
+                            <instance-type>vrf</instance-type>
+                            <route-distinguisher>
+                                <rd-type>{/vars/router-id}:{/id}</rd-type>
+                            </route-distinguisher>
+                            <vrf-target>
+                                <community>target:{/vars/asn}:{/id}</community>
+                            </vrf-target>
+                            <vrf-table-label/>
+                            <protocols>
+                                <bgp>
+                                    <group>
+                                        <name>IPV4-VPN-CUSTOMER</name>
+                                    </group>
+                                    <group>
+                                        <name>IPV6-VPN-CUSTOMER</name>
+                                    </group>
+                                </bgp>
+                            </protocols>
+                        </instance>
+                    </routing-instances>
+                </configuration>
+            </config>
+        </device>
+    </devices>
+</config-template>

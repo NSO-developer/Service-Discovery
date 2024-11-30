@@ -1,0 +1,376 @@
+module netinfra-rfs-private {
+  namespace "http://example.com/respnet/netinfra-rfs-private";
+  prefix nirp;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "Bla bla...";
+
+  revision 2016-01-01 {
+    description
+      "Initial revision.";
+  }
+
+  grouping infra-grouping {
+    container base-config {
+      presence true;
+      uses ncs:service-data;
+      ncs:servicepoint netinfra-rfs-base-config-servicepoint;
+
+      list role {
+        key "name";
+        leaf name {
+          type enumeration {
+            enum "core";
+            enum "edge";
+            enum "peering";
+          }
+        }
+      }
+
+      leaf id {
+        type uint32;
+        description "ID";
+        mandatory "true";
+      }
+
+      leaf ipv4-address {
+        type inet:ipv4-address;
+        description "IPv4 address of the router";
+        mandatory "true";
+      }
+
+      leaf ipv6-address {
+        type inet:ipv6-address;
+        description "IPv6 address of the router";
+        mandatory "true";
+        // TODO: remove and compute based on id and ipv6-prefix
+      }
+
+      container vars {
+        config false;
+        tailf:cdb-oper {
+          tailf:persistent "true";
+        }
+        description "Template variables";
+
+        leaf ipv4-address {
+          type inet:ipv4-address;
+          description "IPv4 address of the router";
+        }
+        leaf ipv6-address {
+          type inet:ipv6-address;
+          description "IPv6 address of the router";
+        }
+        leaf router-id {
+          type inet:ipv4-address;
+          description "Router ID";
+        }
+        leaf isis-net {
+          type string;
+          description "ISIS NET";
+        }
+        leaf isis-auth-mode {
+          type enumeration {
+            enum "disabled";
+            enum "enabled";
+          }
+          description "ISIS authentication mode";
+        }
+        leaf asn {
+          type uint32;
+          description "ASN";
+        }
+        leaf ibgp-auth-key-junos {
+          type string;
+          description "IBGP authentication key for Junos";
+        }
+        leaf dns-domain {
+          type string;
+          description "DNS domain";
+        }
+      }
+    }
+
+    list backbone-interface {
+      key "name";
+
+      tailf:action self-test {
+        tailf:info "Perform self-test of the service";
+        tailf:actionpoint netinfra-rfs-backbone-interface-self-test;
+        output {
+          leaf success {
+            type boolean;
+          }
+          leaf message {
+            type string;
+          }
+        }
+      }
+
+      leaf name {
+        type string;
+        description "Name of the backbone interface";
+        tailf:cli-allow-range;
+      }
+
+      uses ncs:service-data;
+      ncs:servicepoint netinfra-rfs-backbone-interface-servicepoint;
+
+      leaf disabled {
+        type boolean;
+        description "Disable the interface";
+        default "false";
+      }
+
+      leaf ipv4-address {
+        type inet:ipv4-address;
+        description "IPv4 address of the interface";
+      }
+      leaf ipv4-prefix-length {
+        type uint8;
+        description "IPv4 prefix length";
+      }
+      leaf ipv6-address {
+        type inet:ipv6-address;
+        description "IPv6 address of the interface";
+      }
+      leaf ipv6-prefix-length {
+        type uint8;
+        description "IPv6 prefix length";
+      }
+
+      container remote {
+        leaf device {
+          type string;
+          description "Name of the remote device";
+        }
+        leaf interface {
+          type string;
+          description "Name of the remote interface";
+        }
+      }
+      container vars {
+        config false;
+        tailf:cdb-oper {
+          tailf:persistent "true";
+        }
+        description "Template variables";
+        leaf interface-name {
+          type string;
+          description "Interface name";
+        }
+      }
+    }
+
+    list ibgp-neighbor {
+      key "address";
+
+      leaf address {
+        type string;
+        description "Address of the IBGP neighbor";
+        tailf:cli-allow-range;
+      }
+
+      uses ncs:service-data;
+      ncs:servicepoint netinfra-rfs-ibgp-neighbor-servicepoint;
+
+      leaf name {
+        type string;
+        description "Name of the IBGP neighbor";
+      }
+
+      leaf type {
+        type enumeration {
+          enum "full-mesh";
+          enum "rr-client";
+          enum "direct";
+        }
+      }
+
+      container vars {
+        config false;
+        tailf:cdb-oper {
+          tailf:persistent "true";
+        }
+        description "Template variables";
+        leaf group-name {
+          type string;
+          description "BGP group name";
+        }
+      }
+    }
+
+    list internet-interface {
+      key "name";
+
+      leaf name {
+        type string;
+        description "Name of the internet interface";
+        tailf:cli-allow-range;
+      }
+
+      uses ncs:service-data;
+      ncs:servicepoint netinfra-rfs-internet-interface-servicepoint;
+
+      leaf admin-state {
+        type enumeration {
+          enum "in-service";
+          enum "out-of-service";
+          enum "maintenance";
+        }
+        description "Administrative state of the interface";
+        default "in-service";
+      }
+
+      leaf ipv4-address {
+        type inet:ipv4-address;
+        description "IPv4 address of the interface";
+      }
+      leaf ipv4-prefix-length {
+        type uint8;
+        description "IPv4 prefix length";
+      }
+      leaf ipv6-address {
+        type inet:ipv6-address;
+        description "IPv6 address of the interface";
+      }
+      leaf ipv6-prefix-length {
+        type uint8;
+        description "IPv6 prefix length";
+      }
+      container remote {
+        leaf device {
+          type string;
+          description "Name of the remote device";
+        }
+        leaf interface {
+          type string;
+          description "Name of the remote interface";
+        }
+      }
+      container vars {
+        config false;
+        tailf:cdb-oper {
+          tailf:persistent "true";
+        }
+        description "Template variables";
+        leaf interface-name {
+          type string;
+          description "Interface name";
+        }
+      }
+    }
+
+    list vrf {
+      key "name";
+
+      leaf name {
+        type string;
+        description "Name of the VRF";
+        tailf:cli-allow-range;
+      }
+
+      uses ncs:service-data;
+      ncs:servicepoint netinfra-rfs-vrf-servicepoint;
+
+      leaf id {
+        type uint32;
+        description "VRF ID";
+      }
+
+      container vars {
+        config false;
+        tailf:cdb-oper {
+          tailf:persistent "true";
+        }
+        description "Template variables";
+        leaf asn {
+          type uint32;
+          description "ASN";
+        }
+        leaf router-id {
+          type inet:ipv4-address;
+          description "Router ID";
+        }
+      }
+    }
+
+    list vrf-interface {
+      key "name";
+
+      leaf name {
+        type string;
+        description "Name of the VRF interface";
+        tailf:cli-allow-range;
+      }
+
+      uses ncs:service-data;
+      ncs:servicepoint netinfra-rfs-vrf-interface-servicepoint;
+
+      leaf vrf {
+        type leafref {
+          path "../../vrf/name";
+        }
+        description "Name of the VRF";
+      }
+
+      leaf ipv4-address {
+        type inet:ipv4-address;
+        description "IPv4 address of the interface";
+      }
+      leaf ipv4-prefix-length {
+        type uint8;
+        description "IPv4 prefix length";
+      }
+      leaf ipv6-address {
+        type inet:ipv6-address;
+        description "IPv6 address of the interface";
+      }
+      leaf ipv6-prefix-length {
+        type uint8;
+        description "IPv6 prefix length";
+      }
+      container remote {
+        leaf device {
+          type string;
+          description "Name of the remote device";
+        }
+        leaf interface {
+          type string;
+          description "Name of the remote interface";
+        }
+      }
+
+      container feature-flags {
+        description "Temporary feature flags";
+      }
+
+      container deviations {
+        description "Deviations from the reference service model";
+      }
+
+      container vars {
+        config false;
+        tailf:cdb-oper {
+          tailf:persistent "true";
+        }
+        description "Template variables";
+        leaf asn {
+          type uint32;
+          description "ASN";
+        }
+      }
+    }
+  }
+  
+}

@@ -1,0 +1,12 @@
+--- /dev/fd/63	2024-10-07 11:38:20
++++ ../packages/respl3vpn/python/respl3vpn/l3vpn.py	2024-10-07 11:38:14
+@@ -90,6 +90,9 @@
+     def find_services(self, root, service_type):
+         if service_type == 'l3vpn' or service_type == "all":
+             self.find_l3vpn(root)
++            
++        if service_type == 'vrf-ebgp-customer' or service_type == "all":
++            self.find_vrf_ebgp_customer(root)
+ 
+     # Find and create L3VPN services
+     def find_l3vpn(self, root):

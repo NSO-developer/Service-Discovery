@@ -1,0 +1,83 @@
+module netinfra-rfs {
+  namespace "http://example.com/respnet/netinfra-rfs";
+  prefix "nir";
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+  import netinfra-rfs-private {
+    prefix nirp;
+  }
+  import multi-service-action {
+    prefix multi-service-action;
+  }
+
+  description
+    "Bla bla...";
+
+  revision 2016-01-01 {
+    description
+      "Initial revision.";
+  }
+
+  container nodes {
+    list router {
+      key name;
+      leaf name {
+        type string;
+        tailf:cli-allow-range;
+      }
+
+      leaf netsim {
+        type boolean;
+        tailf:hidden "debug";
+      }
+
+      uses nirp:infra-grouping;
+      uses multi-service-action:multi-service-actions;
+
+      tailf:action find-services {
+        tailf:actionpoint netinfra-nodes-find-services;
+        input {
+          leaf service-type {
+            type enumeration {
+              enum "base-config";
+              enum "backbone-interface";
+              enum "ibgp-neighbor";
+              enum "internet-interface";
+              enum "vrf";
+              enum "vrf-interface";
+              enum "all";
+            }
+            default "all";
+          }
+          leaf dry-run {
+            type empty;
+          }
+          leaf reconcile-type {
+            type enumeration {
+              enum "keep-non-service-config";
+              enum "discard-non-service-config";
+            }
+            default "keep-non-service-config";
+          }
+        }
+        output {
+          leaf success {
+            type boolean;
+          }
+          leaf message {
+            type string;
+          }
+          uses ncs:dry-run-cli;
+        }
+      }
+    }
+  }
+}

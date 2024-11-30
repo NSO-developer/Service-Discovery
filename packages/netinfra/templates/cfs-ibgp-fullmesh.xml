@@ -1,0 +1,22 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <nodes xmlns="http://example.com/respnet/netinfra-rfs">
+    <?foreach {/router}?>
+    <?set outer={name}?>
+    <?foreach {../router}?>
+    <router when="{$outer != name}">
+      <name>{$outer}</name>
+      <ibgp-neighbor>
+        <address>{ipv4-address}</address>
+        <name>{name}</name>
+        <type>full-mesh</type>
+      </ibgp-neighbor>
+      <ibgp-neighbor>
+        <address>{ipv6-address}</address>
+        <name>{name}</name>
+        <type>full-mesh</type>
+      </ibgp-neighbor>
+    </router>
+    <?end?>
+    <?end?>
+  </nodes>
+</config-template>

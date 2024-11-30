@@ -1,0 +1,40 @@
+--- /dev/fd/63	2024-10-07 11:38:20
++++ ../packages/respl3vpn/src/yang/respl3vpn.yang	2024-10-07 11:38:14
+@@ -32,6 +32,7 @@
+           leaf service-type {
+             type enumeration {
+               enum "vpn";
++              enum "vrf-ebgp-customer";
+               enum "all";
+             }
+             default "all";
+@@ -135,6 +136,29 @@
+         description "Template variables";
+       }
+       // END_STRIP
++    }
++    list vrf-ebgp-customer {
++      key "address";
++
++      leaf address {
++        type string;
++        description "Address of the eBGP neighbor";
++        tailf:cli-allow-range;
++      }
++
++      uses ncs:service-data;
++      ncs:servicepoint respvpn-vrf-ebgp-customer-servicepoint;
++
++      leaf vpn-id {
++        type leafref {
++          path "../../vpn/id";
++        }
++        description "VPN ID";
++      }
++      leaf router {
++        type string;
++        description "Name of the router";
++      }
+     }
+   }
+ }

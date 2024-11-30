@@ -1,0 +1,18 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <nodes xmlns="http://example.com/respnet/netinfra-rfs">
+    <router>
+      <name>{/name}</name>
+      <base-config>
+        <?foreach {/role}?>
+        <role>
+          <name>{name}</name>
+        </role>
+        <?end?>
+        <id>{/vars/id}</id>
+        <ipv4-address>{/vars/ipv4-address}</ipv4-address>
+        <ipv6-address>{/vars/ipv6-address}</ipv6-address>
+      </base-config>
+      <netsim>{/netsim}</netsim>
+    </router>
+  </nodes>
+</config-template>

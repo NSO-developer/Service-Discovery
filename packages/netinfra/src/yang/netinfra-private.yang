@@ -1,0 +1,46 @@
+module netinfra-private {
+  namespace "http://example.com/respnet/netinfra-private";
+  prefix "netinfra-private";
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "Bla bla...";
+
+  revision 2016-01-01 {
+    description
+      "Initial revision.";
+  }
+
+  container infra-internal {
+    container ibgp-fullmesh {
+      presence "Enable iBGP full mesh";
+
+      uses ncs:service-data;
+      ncs:servicepoint netinfra-ibgp-fullmesh-servicepoint;
+
+      list router {
+        key "name";
+        leaf name {
+          type string;
+        }
+        leaf ipv4-address {
+          type inet:ipv4-address;
+          mandatory true;
+        }
+        leaf ipv6-address {
+          type inet:ipv6-address;
+          mandatory true;
+        }
+      }
+    }
+  }
+}

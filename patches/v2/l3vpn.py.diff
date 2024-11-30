@@ -1,0 +1,42 @@
+--- /dev/fd/63	2024-10-07 10:09:21
++++ ../packages/respl3vpn/python/respl3vpn/l3vpn.py	2024-10-07 10:09:16
+@@ -47,6 +47,11 @@
+ 
+             vrf_interface.remote.device = ep.remote.device
+             vrf_interface.remote.interface = ep.remote.interface
++            mtu = service.mtu
++            if ep.mtu is not None and ep.mtu != mtu:
++                mtu = ep.mtu
++            if mtu != 1500: # avoid default value
++                vrf_interface.mtu = mtu
+ 
+ class FindServices(Action):
+     @Action.action
+@@ -88,9 +93,13 @@
+ 
+     # Find and create L3VPN services
+     def find_l3vpn(self, root):
++        vpn_mtus = {}
+         for nr in root.nodes.router:
+             for vrf in nr.vrf:
+                 l3vpn = root.rel3vpn__l3vpn.vpn.create(int(vrf.id) - 10000)
++                if l3vpn.id not in vpn_mtus:
++                    vpn_mtus[l3vpn.id] = []
++                mtus = vpn_mtus[l3vpn.id]
+                 for vrf_interface in nr.vrf_interface:
+                     if vrf_interface.vrf == vrf.name:
+                         ep = l3vpn.endpoint.create(nr.name, vrf_interface.name)
+@@ -99,6 +108,13 @@
+                         ep.remote.device = vrf_interface.remote.device
+                         ep.remote.interface = vrf_interface.remote.interface
+ 
++                        ep.mtu = vrf_interface.mtu
++                        mtus.append(vrf_interface.mtu)
++                most_common_mtu = max(set(mtus), key=mtus.count)
++                l3vpn.mtu = most_common_mtu
++                for ep in l3vpn.endpoint:
++                    if ep.mtu == most_common_mtu:
++                        del(ep.mtu)
+ 
+     def find_vrf_ebgp_customer(self, root):
+         for nr in root.nodes.router:

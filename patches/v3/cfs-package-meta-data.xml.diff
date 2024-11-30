@@ -1,0 +1,14 @@
+--- /dev/fd/63	2024-10-07 11:38:20
++++ ../packages/respl3vpn/package-meta-data.xml	2024-10-07 11:38:14
+@@ -11,4 +11,11 @@
+     </application>
+   </component>
+ 
++  <component>
++    <name>vrf-ebgp-customer</name>
++    <application>
++      <python-class-name>respl3vpn.vrf_ebgp_customer.Main</python-class-name>
++    </application>
++  </component>
++
+ </ncs-package>

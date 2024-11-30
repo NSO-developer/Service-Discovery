@@ -1,0 +1,125 @@
+module respl3vpn {
+  namespace "http://example.com/respnet/l3vpn";
+  prefix rel3vpn;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "L3VPN CFS
+
+    Although this should probably be an internal service layer and the IETF
+    L3VPN SM should be layered on top.";
+
+  revision 2016-01-01 {
+    description
+      "Initial revision.";
+  }
+
+  container l3vpn {
+    description "L3VPN";
+
+      tailf:action find-services {
+        tailf:actionpoint l3vpn-find-services;
+        input {
+          leaf service-type {
+            type enumeration {
+              enum "vpn";
+              enum "all";
+            }
+            default "all";
+          }
+          leaf dry-run {
+            type empty;
+          }
+          leaf reconcile-type {
+            type enumeration {
+              enum "keep-non-service-config";
+              enum "discard-non-service-config";
+            }
+            default "keep-non-service-config";
+          }
+        }
+        output {
+          leaf success {
+            type boolean;
+          }
+          leaf message {
+            type string;
+          }
+          uses ncs:dry-run-cli;
+        }
+      }
+
+    list vpn {
+      key id;
+      leaf id {
+        description "ID";
+        tailf:cli-allow-range;
+        type uint32;
+      }
+
+      leaf name {
+        type string;
+        description "Name";
+      }
+
+      uses ncs:service-data;
+      ncs:servicepoint respvpn-l3vpn-servicepoint;
+
+      list endpoint {
+        key "router interface";
+        leaf router {
+          type string;
+        }
+        leaf interface {
+          type string;
+        }
+
+        leaf ipv4-prefix {
+          type inet:ipv4-prefix;
+          mandatory true;
+        }
+        leaf ipv6-prefix {
+          type inet:ipv6-prefix;
+        }
+
+        container remote {
+          leaf device {
+            type string;
+            description "Name of the remote device";
+          }
+          leaf interface {
+            type string;
+            description "Name of the remote interface";
+          }
+        }
+      }
+
+      container feature-flags {
+        description "Temporary feature flags";
+      }
+
+      container deviations {
+        description "Deviations from the reference service model";
+      }
+
+      // BEGIN_STRIP
+      container vars {
+        config false;
+        tailf:cdb-oper {
+          tailf:persistent "true";
+        }
+        description "Template variables";
+      }
+      // END_STRIP
+    }
+  }
+}

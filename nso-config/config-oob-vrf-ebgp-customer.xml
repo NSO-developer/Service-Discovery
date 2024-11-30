@@ -1,0 +1,29 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>ER-3</name>
+      <config tags="merge">
+        <configuration xmlns="http://xml.juniper.net/xnm/1.1/xnm">
+          <routing-instances>
+            <instance>
+              <name>10456</name>
+              <protocols>
+                <bgp>
+                  <group>
+                    <name>IPV4-VPN-CUSTOMER</name>
+                    <neighbor>
+                      <name>2.1.3.2</name>
+                      <description>Customer router</description>
+                      <peer-as>64513</peer-as>
+                      <as-override/>
+                    </neighbor>
+                  </group>
+                </bgp>
+              </protocols>
+            </instance>
+          </routing-instances>
+        </configuration>
+      </config>
+    </device>
+  </devices>
+</config>

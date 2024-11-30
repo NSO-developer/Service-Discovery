@@ -1,0 +1,51 @@
+--- /dev/fd/63	2024-10-07 11:38:20
++++ ../packages/netinfra-rfs/src/yang/netinfra-rfs-private.yang	2024-10-07 11:34:31
+@@ -379,6 +379,48 @@
+         }
+       }
+     }
++
++    list ebgp-neighbor {
++      key "address";
++
++      leaf address {
++        type string;
++        description "Address of the eBGP neighbor";
++        tailf:cli-allow-range;
++      }
++
++      uses ncs:service-data;
++      ncs:servicepoint netinfra-rfs-ebgp-neighbor-servicepoint;
++
++      leaf type {
++        type enumeration {
++          enum "customer";
++        }
++      }
++
++      leaf vrf {
++        type leafref {
++          path "../../vrf/name";
++        }
++        description "Name of the VRF";
++      }
++
++      container vars {
++        config false;
++        tailf:cdb-oper {
++          tailf:persistent "true";
++        }
++        description "Template variables";
++        leaf group-name {
++          type string;
++          description "BGP group name";
++        }
++        leaf description {
++          type string;
++          description "BGP group name";
++        }
++      }
++    }
+   }
+   
+ }
