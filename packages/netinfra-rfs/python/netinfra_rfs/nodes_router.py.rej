@@ -1,0 +1,26 @@
+@@ -224,6 +227,17 @@
+             self.log.debug('Create vrf service')
+             service.vrf.create(instance.name).id = rid
+ 
++    def find_ebgp_neighbor(self, device, service):
++        for ri in device.routing_instances.instance:
++            self.log.info(ri)
++            for group in ri.protocols.bgp.group:
++                if group.name == 'IPV4-VPN-CUSTOMER':
++                    self.log.debug('Found customer eBGP group')
++                    for neighbor in group.neighbor:
++                        ebgp_neighbor = service.ebgp_neighbor.create(neighbor.name)
++                        ebgp_neighbor.type = 'customer'
++                        ebgp_neighbor.vrf = ri.name
++
+ class CreateRfs(NanoService):
+     @NanoService.create
+     def cb_nano_create(self, tctx, root, service, plan, component, state, proplist, compproplist):
+@@ -242,6 +256,7 @@
+         maapi.shared_copy_tree(trans.th, service.ibgp_neighbor._path, rfs_router.ibgp_neighbor._path)
+         maapi.shared_copy_tree(trans.th, service.vrf._path, rfs_router.vrf._path)
+         maapi.shared_copy_tree(trans.th, service.vrf_interface._path, rfs_router.vrf_interface._path)
++        maapi.shared_copy_tree(trans.th, service.ebgp_neighbor._path, rfs_router.ebgp_neighbor._path)
+ 
+ class Main(ncs.application.Application):
+     def setup(self):

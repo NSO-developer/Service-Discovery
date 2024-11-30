@@ -1,0 +1,52 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <nodes xmlns="http://example.com/respnet/netinfra-rfs">
+    <router>
+      <name>{/left-router}</name>
+      <backbone-interface>
+        <name>{/left-interface}</name>
+        <ipv4-address>{/vars/left-ipv4-address}</ipv4-address>
+        <ipv4-prefix-length>{/vars/ipv4-prefix-length}</ipv4-prefix-length>
+        <ipv6-address>{/vars/left-ipv6-address}</ipv6-address>
+        <ipv6-prefix-length>{/vars/ipv6-prefix-length}</ipv6-prefix-length>
+        <remote>
+          <device>{/right-router}</device>
+          <interface>{/right-interface}</interface>
+        </remote>
+      </backbone-interface>
+      <ibgp-neighbor when="{/vars/left-ibgp-type != 'none'}">
+        <address>{/vars/right-ipv4-loopback-address}</address>
+        <name>{/right-router}</name>
+        <type>{/vars/left-ibgp-type}</type>
+      </ibgp-neighbor>
+      <ibgp-neighbor when="{/vars/left-ibgp-type != 'none'}">
+        <address>{/vars/right-ipv6-loopback-address}</address>
+        <name>{/right-router}</name>
+        <type>{/vars/left-ibgp-type}</type>
+      </ibgp-neighbor>
+    </router>
+    <router>
+      <name>{/right-router}</name>
+      <backbone-interface>
+        <name>{/right-interface}</name>
+        <ipv4-address>{/vars/right-ipv4-address}</ipv4-address>
+        <ipv4-prefix-length>{/vars/ipv4-prefix-length}</ipv4-prefix-length>
+        <ipv6-address>{/vars/right-ipv6-address}</ipv6-address>
+        <ipv6-prefix-length>{/vars/ipv6-prefix-length}</ipv6-prefix-length>
+        <remote>
+          <device>{/left-router}</device>
+          <interface>{/left-interface}</interface>
+        </remote>
+      </backbone-interface>
+      <ibgp-neighbor when="{/vars/left-ibgp-type != 'none'}">
+        <address>{/vars/left-ipv4-loopback-address}</address>
+        <name>{/left-router}</name>
+        <type>{/vars/right-ibgp-type}</type>
+      </ibgp-neighbor>
+      <ibgp-neighbor when="{/vars/left-ibgp-type != 'none'}">
+        <address>{/vars/left-ipv6-loopback-address}</address>
+        <name>{/left-router}</name>
+        <type>{/vars/right-ibgp-type}</type>
+      </ibgp-neighbor>
+    </router>
+  </nodes>
+</config-template>

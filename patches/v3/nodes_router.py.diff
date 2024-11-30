@@ -1,0 +1,29 @@
+--- /dev/fd/63	2024-10-07 11:38:20
++++ ../packages/netinfra-rfs/python/netinfra_rfs/nodes_router.py	2024-10-07 11:36:45
+@@ -56,6 +56,9 @@
+             if service_type == 'vrf-interface' or service_type == 'all':
+                 self.find_vrf_interface(device, service)
+ 
++            if service_type == 'ebgp-neighbor' or service_type == 'all':
++                self.find_ebgp_neighbor(device, service)
++
+     def find_backbone_interfaces(self, device, service):
+         backbone_if_services = dict()
+         for iface in device.interfaces.interface:
+@@ -224,6 +227,16 @@
+             self.log.debug('Create vrf service')
+             service.vrf.create(instance.name).id = rid
+ 
++    def find_ebgp_neighbor(self, device, service):
++        for ri in device.routing_instances.instance:
++            self.log.info(ri)
++            for group in ri.protocols.bgp.group:
++                if group.name == 'IPV4-VPN-CUSTOMER':
++                    self.log.debug('Found customer eBGP group')
++                    for neighbor in group.neighbor:
++                        ebgp_neighbor = service.ebgp_neighbor.create(neighbor.name)
++                        ebgp_neighbor.type = 'customer'
++                        ebgp_neighbor.vrf = ri.name
+ 
+ class Main(ncs.application.Application):
+     def setup(self):

@@ -1,0 +1,1224 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device tags="nocreate">
+            <name>{$DEVICE}</name>
+            <config tags="merge">
+
+                <!-- JUNOS -->
+                <configuration xmlns="http://xml.juniper.net/xnm/1.1/xnm">
+                    <system>
+                        <host-name>{$DEVICE}</host-name>
+                        <domain-name>{/vars/dns-domain}</domain-name>
+                        <time-zone>UTC</time-zone>
+                        <commit>
+                            <synchronize/>
+                        </commit>
+                        <ports>
+                            <console>
+                                <log-out-on-disconnect/>
+                            </console>
+                        </ports>
+                        <login>
+                            <retry-options>
+                                <tries-before-disconnect>3</tries-before-disconnect>
+                                <backoff-threshold>2</backoff-threshold>
+                                <backoff-factor>5</backoff-factor>
+                                <minimum-time>30</minimum-time>
+                            </retry-options>
+                        </login>
+                        <services>
+                            <ssh>
+                                <max-sessions-per-connection>100</max-sessions-per-connection>
+                                <ciphers>aes128-ctr</ciphers>
+                                <ciphers>aes192-ctr</ciphers>
+                                <ciphers>aes256-ctr</ciphers>
+                                <ciphers>chacha20-poly1305@openssh.com</ciphers>
+                                <connection-limit>250</connection-limit>
+                                <rate-limit>250</rate-limit>
+                            </ssh>
+                            <netconf>
+                                <!-- rfc-compliant is required to stablize CI
+                                     on versions before 17
+                                     but breaks Junos NED on 17 or later -->
+                                <rfc-compliant tags="delete"/>
+                            </netconf>
+                            <extension-service when="{feature-flags/telemetry='true'}">
+                                <request-response>
+                                <grpc>
+                                    <undocumented>
+                                    <clear-text>
+                                        <port>57400</port>
+                                    </clear-text>
+                                    </undocumented>
+                                </grpc>
+                                </request-response>
+                            </extension-service>
+                        </services>
+                        <syslog>
+                            <source-address>{/vars/ipv6-address}</source-address>
+                        </syslog>
+                        <!-- <ntp> -->
+                        <!--     <source-address> -->
+                        <!--         <name>{/vars/ipv6-address}</name> -->
+                        <!--     </source-address> -->
+                        <!-- </ntp> -->
+                    </system>
+                    <interfaces>
+                        <interface>
+                            <name>lo0</name>
+                            <unit>
+                                <name>0</name>
+                                <description>Loopback</description>
+                                <family>
+                                    <inet>
+                                        <address>
+                                            <name>{/ipv4-address}/32</name>
+                                        </address>
+                                        <!-- <filter> -->
+                                        <!--     <input> -->
+                                        <!--         <filter-name>IPV4-LO0-ACL-IN</filter-name> -->
+                                        <!--     </input> -->
+                                        <!-- </filter> -->
+                                    </inet>
+                                    <inet6>
+                                        <address>
+                                            <name>{/ipv6-address}/128</name>
+                                        </address>
+                                        <!-- <filter> -->
+                                        <!--     <input> -->
+                                        <!--         <filter-name>IPV6-LO0-ACL-IN</filter-name> -->
+                                        <!--     </input> -->
+                                        <!-- </filter> -->
+                                    </inet6>
+                                    <iso>
+                                        <address>
+                                            <name>{/vars/isis-net}</name>
+                                        </address>
+                                    </iso>
+                                </family>
+                            </unit>
+                        </interface>
+                    </interfaces>
+                    <!-- <firewall> -->
+                    <!--     <family> -->
+                    <!--         <inet> -->
+                    <!--                 <filter tags="replace"> -->
+                    <!--                 <name>IPV4-LO0-ACL-IN</name> -->
+                    <!--                 <!-\- allow all on OOB port -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>OOB</name> -->
+                    <!--                     <from> -->
+                    <!--                         <interface> -->
+                    <!--                             <name>fxp0.0</name> -->
+                    <!--                         </interface> -->
+                    <!--                         <interface> -->
+                    <!--                             <name>em0.0</name> -->
+                    <!--                         </interface> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- silently drop (do not send ICMP error message back) remaining -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>DISCARD</name> -->
+                    <!--                     <then> -->
+                    <!--                         <discard> -->
+                    <!--                         </discard> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--             </filter> -->
+                    <!--             <filter> -->
+                    <!--                 <name>IPV4-LO0-ACL-IN</name> -->
+                    <!--                 <!-\- allow all on OOB port -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>OOB</name> -->
+                    <!--                     <from> -->
+                    <!--                         <interface> -->
+                    <!--                             <name>fxp0.0</name> -->
+                    <!--                         </interface> -->
+                    <!--                         <interface> -->
+                    <!--                             <name>em0.0</name> -->
+                    <!--                         </interface> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- we don't accept IPv4 SSH connection -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>SSH-BLOCK</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>22</destination-port> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <discard> -->
+                    <!--                         </discard> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept SSH return traffic - reply to outgoing TCP/22 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>SSH-REPLY</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <protocol>tcp</protocol> -->
+                    <!--                         <source-port>22</source-port> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- accept iBGP - incoming to TCP/179 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>IBGP-INCOMING</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>179</destination-port> -->
+                    <!--                         <protocol>tcp</protocol> -->
+                    <!--                         <source-port>1024-65535</source-port> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV4-IBGP-NEIGHBORS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept iBGP - reply to outgoing TCP/179 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>IBGP-REPLY</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <protocol>tcp</protocol> -->
+                    <!--                         <source-port>179</source-port> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV4-IBGP-NEIGHBORS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept eBGP from peer & customer - incoming on TCP/179 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>EBGP-INCOMING</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>179</destination-port> -->
+                    <!--                         <protocol>tcp</protocol> -->
+                    <!--                         <source-port>1024-65535</source-port> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV4-EBGP-NEIGHBORS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept eBGP from peer & customer - reply to outgoing TCP/179 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>EBGP-REPLY</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <protocol>tcp</protocol> -->
+                    <!--                         <source-port>179</source-port> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV4-EBGP-NEIGHBORS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept eBGP from peer & customer - with GTSM enabled - incoming -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>EBGP-GTSM255-INCOMING</name> -->
+                    <!--                     <from> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV4-EBGP-NEIGHBORS-GTSM255</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <protocol>tcp</protocol> -->
+                    <!--                         <ttl>255</ttl> -->
+                    <!--                         <destination-port>179</destination-port> -->
+                    <!--                         <source-port>1024-65535</source-port> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept eBGP from peer & customer - with GTSM enabled - reply -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>EBGP-GTSM255-REPLY</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <protocol>tcp</protocol> -->
+                    <!--                         <source-port>179</source-port> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV4-EBGP-NEIGHBORS-GTSM255</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <ttl>255</ttl> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- accept BFD control - incoming to UDP/3784 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>BFD-CONTROL-INCOMING</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>3784</destination-port> -->
+                    <!--                         <protocol>udp</protocol> -->
+                    <!--                         <source-port>1024-65535</source-port> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept BFD control - reply to outgoing UDP/3784 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>BFD-CONTROL-REPLY</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <protocol>udp</protocol> -->
+                    <!--                         <source-port>3784</source-port> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept BFD echo - incoming to UDP/3785 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>BFD-ECHO-INCOMING</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>3785</destination-port> -->
+                    <!--                         <protocol>udp</protocol> -->
+                    <!--                         <source-port>1024-65535</source-port> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept BFD - reply to outgoing UDP/3785 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>BFD-ECHO-REPLY</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <protocol>udp</protocol> -->
+                    <!--                         <source-port>3785</source-port> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept MH-BFD control - incoming to UDP/4784 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>MH-BFD-CONTROL-INCOMING</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>4784</destination-port> -->
+                    <!--                         <protocol>udp</protocol> -->
+                    <!--                         <source-port>1024-65535</source-port> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept MH-BFD control - reply to outgoing UDP/4784 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>MH-BFD-CONTROL-REPLY</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <protocol>udp</protocol> -->
+                    <!--                         <source-port>4784</source-port> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- accept ICMP time exceeded -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMP-TIME-EXCEEDED</name> -->
+                    <!--                     <from> -->
+                    <!--                         <protocol>icmp</protocol> -->
+                    <!--                         <icmp-type>time-exceeded</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMP unreachable -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMP-UNREACHABLE</name> -->
+                    <!--                     <from> -->
+                    <!--                         <protocol>icmp</protocol> -->
+                    <!--                         <icmp-type>unreachable</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- allow ICMP echo-request -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMP-ECHO-REQUEST</name> -->
+                    <!--                     <from> -->
+                    <!--                         <protocol>icmp</protocol> -->
+                    <!--                         <icmp-type>echo-request</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- allow ICMP echo-reply -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMP-ECHO-REPLY</name> -->
+                    <!--                     <from> -->
+                    <!--                         <protocol>icmp</protocol> -->
+                    <!--                         <icmp-type>echo-reply</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept> -->
+                    <!--                         </accept> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- reject remaining, we respond with an ICMP error to be nice or otherwise things like traceroute breaks-\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>REJECT</name> -->
+                    <!--                     <then> -->
+                    <!--                         <reject> -->
+                    <!--                         </reject> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--             </filter> -->
+                    <!--         </inet> -->
+                    <!--         <inet6> -->
+                    <!--             <filter tags="replace"> -->
+                    <!--                 <name>IPV6-LO0-ACL-IN</name> -->
+                    <!--                 <!-\- allow all on OOB port -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>OOB</name> -->
+                    <!--                     <from> -->
+                    <!--                         <interface> -->
+                    <!--                             <name>fxp0.0</name> -->
+                    <!--                         </interface> -->
+                    <!--                         <interface> -->
+                    <!--                             <name>em0.0</name> -->
+                    <!--                         </interface> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- accept SSH from MGMT - incoming to TCP/22 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>SSH-FROM-MGMT</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <destination-port>22</destination-port> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-MGMT</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- explicitly block SSH from rest to avoid -->
+                    <!--                  fat fingering, i.e. if a later rule for -->
+                    <!--                  TCP traffic only matches on the source -->
+                    <!--                  port, like incoming from port 179 is BGP, -->
+                    <!--                  then it is possible to circumvent the CPM -->
+                    <!--                  protection by doing SSH from port 179 to -->
+                    <!--                  port 22. This term is to explicitly -->
+                    <!--                  prevent that. -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>SSH-BLOCK-REST</name> -->
+                    <!--                     <then> -->
+                    <!--                         <discard/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <destination-port>22</destination-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- allow NETCONF from MGMT -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>NETCONF-FROM-MGMT</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <destination-port>830</destination-port> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-MGMT</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- explicitly block NETCONF from rest to -->
+                    <!--                      avoid fat fingering, see previous -->
+                    <!--                      explanation for SSH -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>NETCONF-BLOCK-REST</name> -->
+                    <!--                     <then> -->
+                    <!--                         <discard/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <destination-port>830</destination-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept SNMP from MGMT -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>SNMP-FROM-MGMT</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>udp</next-header> -->
+                    <!--                         <destination-port>161</destination-port> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-MGMT</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept SSH return traffic - reply to outgoing TCP/22 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>SSH-REPLY</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <source-port>22</source-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- 20-29 BGP traffic -\-> -->
+                    <!--                 <!-\- accept iBGP - incoming to TCP/179 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>IBGP-INCOMING</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <destination-port>179</destination-port> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-IBGP-NEIGHBORS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <source-port>1024-65535</source-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept iBGP - reply to outgoing TCP/179 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>IBGP-RETURN</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-IBGP-NEIGHBORS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <source-port>179</source-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept eBGP from peer & customer - incoming on TCP/179 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>EBGP-INCOMING</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <destination-port>179</destination-port> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-EBGP-NEIGHBORS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <source-port>1024-65535</source-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept eBGP from peer & customer - reply to outgoing TCP/179 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>EBGP-RETURN</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-EBGP-NEIGHBORS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <source-port>179</source-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept eBGP from peer & customer - with GTSM enabled - incoming on TCP/179 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>EBGP-GTSM255-INCOMING</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <destination-port>179</destination-port> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-EBGP-NEIGHBORS-GTSM255</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <source-port>1024-65535</source-port> -->
+                    <!--                         <hop-limit>255</hop-limit> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept eBGP from peer & customer - with GTSM enabled - reply to outgoing TCP/179 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>EBGP-GTSM255-RETURN</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-EBGP-NEIGHBORS-GTSM255</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <source-port>179</source-port> -->
+                    <!--                         <hop-limit>255</hop-limit> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept PIM -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>PIM</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>pim</next-header> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- 40-49 BFD -\-> -->
+                    <!--                 <!-\- accept BFD control - incoming to UDP/3784 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>BFD-CONTROL-INCOMING</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>udp</next-header> -->
+                    <!--                         <source-port>3784</source-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept BFD control - reply to outgoing UDP/3784 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>BFD-CONTROL-RETURN</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>udp</next-header> -->
+                    <!--                         <destination-port>3784</destination-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept BFD - incoming to UDP/3785 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>BFD-INCOMING</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>udp</next-header> -->
+                    <!--                         <source-port>3785</source-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept BFD - reply to outgoing UDP/3785 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>BFD-RETURN</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>udp</next-header> -->
+                    <!--                         <destination-port>3785</destination-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept MH-BFD control - incoming to UDP/4784 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>MH-BFD-CONTROL-INCOMING</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>udp</next-header> -->
+                    <!--                         <source-port>4784</source-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept MH-BFD control - reply to outgoing UDP/4784 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>MH-BFD-CONTROL-RETURN</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>udp</next-header> -->
+                    <!--                         <destination-port>4784</destination-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- accept NTP -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>NTP</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>udp</next-header> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-NTP-SERVERS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <source-port>123</source-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept DNS replies - reply to outgoing UDP/53-\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>DNS-UDP-RETURN</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>udp</next-header> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-DNS-SERVERS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <source-port>53</source-port> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept DNS replies - reply to outgoing TCP/53-\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>DNS-TCP-RETURN</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-port>1024-65535</destination-port> -->
+                    <!--                         <next-header>tcp</next-header> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-DNS-SERVERS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <source-port>53</source-port> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- allow incoming DHCPV6 packets from clients -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>DHCPV6-RELAY-CLIENT</name> -->
+                    <!--                     <from> -->
+                    <!--                         <destination-address> -->
+                    <!--                             <name>ff02::1:2/128</name> -->
+                    <!--                         </destination-address> -->
+                    <!--                         <destination-address> -->
+                    <!--                             <name>ff02::1/128</name> -->
+                    <!--                         </destination-address> -->
+                    <!--                         <next-header>udp</next-header> -->
+                    <!--                         <source-port>546</source-port> -->
+                    <!--                         <destination-port>547</destination-port> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- allow packets from DHCPV6 servers -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>DHCPV6-RELAY-SERVER</name> -->
+                    <!--                     <from> -->
+                    <!--                         <source-prefix-list> -->
+                    <!--                             <name>IPV6-DHCPV6-SERVERS</name> -->
+                    <!--                         </source-prefix-list> -->
+                    <!--                         <source-port>547</source-port> -->
+                    <!--                         <destination-port>547</destination-port> -->
+                    <!--                     </from> -->
+                    <!--                     <then> -->
+                    <!--                         <count>dhcp6 from server</count> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- 60-69 various ICMPv6 control packets -\-> -->
+                    <!--                 <!-\- accept ICMPv6 type 1 - Destination Unreachable -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-1</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>destination-unreachable</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 2 - Packet Too Big -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-2</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>packet-too-big</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 3 - Time Exceeded -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-3</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>time-exceeded</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 4 - Parameter Problem -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-4</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>parameter-problem</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 128 - Echo Request -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-128</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>echo-request</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 129 - Echo Reply -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-129</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>echo-reply</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 130 - MLD Listener Request -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-130</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>membership-query</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 131 - MLD Listener Report -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-131</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>membership-report</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 132 - MLD Listener Done -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-132</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>membership-termination</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 133 - Router Solicitation -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-133</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>router-solicit</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 135 - Neighbor Solicitation -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-135</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>neighbor-solicit</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 136 - Neighbor Advertisement -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-136</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>neighbor-advertisement</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- explicitly omit ICMPv6 type 137 - Redirect - will be discarded at end -\-> -->
+                    <!--                 <!-\- accept ICMPv6 type 141 - Inverse Neighbor Solicitation -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPv6-TYPE-141</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>141</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 142 - Inverse Neighbor Discovery Advertisement -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPV6-TYPE-142</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>142</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+                    <!--                 <!-\- accept ICMPv6 type 143 - MLD Listener Report v2 -\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>ICMPV6-TYPE-143</name> -->
+                    <!--                     <then> -->
+                    <!--                         <accept/> -->
+                    <!--                     </then> -->
+                    <!--                     <from> -->
+                    <!--                         <next-header>icmpv6</next-header> -->
+                    <!--                         <icmp-type>143</icmp-type> -->
+                    <!--                     </from> -->
+                    <!--                 </term> -->
+
+                    <!--                 <!-\- reject remaining, we respond with an ICMP error to be nice or otherwise things like traceroute breaks-\-> -->
+                    <!--                 <term> -->
+                    <!--                     <name>REJECT</name> -->
+                    <!--                     <then> -->
+                    <!--                         <reject> -->
+                    <!--                         </reject> -->
+                    <!--                     </then> -->
+                    <!--                 </term> -->
+                    <!--             </filter> -->
+                    <!--         </inet6> -->
+                    <!--     </family> -->
+                    <!-- </firewall> -->
+
+                    <protocols>
+                        <bgp>
+                            <advertise-inactive/>
+                            <group>
+                                <name>IPV4-CUSTOMER</name>
+                                <family>
+                                    <inet>
+                                        <unicast>
+                                        </unicast>
+                                    </inet>
+                                </family>
+                            </group>
+                            <group>
+                                <name>IPV6-CUSTOMER</name>
+                                <family>
+                                    <inet6>
+                                        <unicast>
+                                        </unicast>
+                                    </inet6>
+                                </family>
+                            </group>
+                            <group>
+                                <name>IPV4-PEER</name>
+                                <family>
+                                    <inet>
+                                        <unicast>
+                                        </unicast>
+                                    </inet>
+                                </family>
+                            </group>
+                            <group>
+                                <name>IPV6-PEER</name>
+                                <family>
+                                    <inet6>
+                                        <unicast>
+                                        </unicast>
+                                    </inet6>
+                                </family>
+                            </group>
+                            <group>
+                                <name>IPV4-IBGP-CLIENTS</name>
+                                <type>internal</type>
+                                <local-address>{/ipv4-address}</local-address>
+                                <family>
+                                    <inet>
+                                        <unicast/>
+                                    </inet>
+                                    <inet-vpn>
+                                        <unicast/>
+                                    </inet-vpn>
+                                </family>
+                                <authentication-key when="/vars/ibgp-auth-key-junos">{/vars/ibgp-auth-key-junos}</authentication-key>
+                                <!-- <export>IPV4-IBGP-CLIENTS-EXPORT</export> -->
+                                <!-- <import>IPV4-IBGP-CLIENTS-IMPORT</import> -->
+                                <peer-as>{/vars/asn}</peer-as>
+                                <cluster>{/vars/router-id}</cluster>
+                            </group>
+                            <group>
+                                <name>IPV4-IBGP-FULLMESH</name>
+                                <type>internal</type>
+                                <local-address>{/ipv4-address}</local-address>
+                                <family>
+                                    <inet>
+                                        <unicast/>
+                                    </inet>
+                                    <inet-vpn>
+                                        <unicast/>
+                                    </inet-vpn>
+                                </family>
+                                <authentication-key when="/vars/ibgp-auth-key-junos">{/vars/ibgp-auth-key-junos}</authentication-key>
+                                <!-- <export>IPV4-IBGP-FULLMESH-EXPORT</export> -->
+                                <!-- <import>IPV4-IBGP-FULLMESH-IMPORT</import> -->
+                                <peer-as>{/vars/asn}</peer-as>
+                            </group>
+                            <group>
+                                <name>IPV4-IBGP</name>
+                                <type>internal</type>
+                                <local-address>{/ipv4-address}</local-address>
+                                <family>
+                                    <inet>
+                                        <unicast/>
+                                    </inet>
+                                    <inet-vpn>
+                                        <unicast/>
+                                    </inet-vpn>
+                                </family>
+                                <authentication-key when="/vars/ibgp-auth-key-junos">{/vars/ibgp-auth-key-junos}</authentication-key>
+                                <export>IPV4-IBGP-EXPORT</export>
+                                <!-- <import>IPV6-IBGP-FULLMESH-IMPORT</import> -->
+                                <peer-as>{/vars/asn}</peer-as>
+                            </group>
+                            <group>
+                                <name>IPV6-IBGP-CLIENTS</name>
+                                <type>internal</type>
+                                <local-address>{/ipv6-address}</local-address>
+                                <family>
+                                    <inet6>
+                                        <unicast/>
+                                    </inet6>
+                                    <inet6-vpn>
+                                        <unicast/>
+                                    </inet6-vpn>
+                                </family>
+                                <authentication-key when="/vars/ibgp-auth-key-junos">{/vars/ibgp-auth-key-junos}</authentication-key>
+                                <!-- <export>IPV6-IBGP-CLIENTS-EXPORT</export> -->
+                                <!-- <import>IPV6-IBGP-CLIENTS-IMPORT</import> -->
+                                <peer-as>{/vars/asn}</peer-as>
+                                <cluster>{/vars/router-id}</cluster>
+                            </group>
+                            <group>
+                                <name>IPV6-IBGP-FULLMESH</name>
+                                <type>internal</type>
+                                <local-address>{/ipv6-address}</local-address>
+                                <family>
+                                    <inet6>
+                                        <unicast/>
+                                    </inet6>
+                                    <inet6-vpn>
+                                        <unicast/>
+                                    </inet6-vpn>
+                                </family>
+                                <authentication-key when="/vars/ibgp-auth-key-junos">{/vars/ibgp-auth-key-junos}</authentication-key>
+                                <!-- <export>IPV6-IBGP-FULLMESH-EXPORT</export> -->
+                                <!-- <import>IPV6-IBGP-FULLMESH-IMPORT</import> -->
+                                <peer-as>{/vars/asn}</peer-as>
+                            </group>
+                            <group>
+                                <name>IPV6-IBGP</name>
+                                <type>internal</type>
+                                <local-address>{/ipv6-address}</local-address>
+                                <family>
+                                    <inet6>
+                                        <unicast/>
+                                    </inet6>
+                                    <inet6-vpn>
+                                        <unicast/>
+                                    </inet6-vpn>
+                                </family>
+                                <authentication-key when="/vars/ibgp-auth-key-junos">{/vars/ibgp-auth-key-junos}</authentication-key>
+                                <!-- <export>IPV6-IBGP-FULLMESH-EXPORT</export> -->
+                                <!-- <import>IPV6-IBGP-FULLMESH-IMPORT</import> -->
+                                <peer-as>{/vars/asn}</peer-as>
+                            </group>
+                        </bgp>
+                        <!-- TODO: KLL marker down from here -->
+                        <isis>
+                            <!-- <export>ISIS-EXPORT</export> -->
+                            <lsp-lifetime>65535</lsp-lifetime>
+                            <ignore-attached-bit/>
+                            <spf-options>
+                                <delay>50</delay>
+                                <holddown>2000</holddown>
+                                <rapid-runs>5</rapid-runs>
+                            </spf-options>
+                            <topologies>
+                                <ipv6-unicast/>
+                            </topologies>
+                            <level>
+                                <name>2</name>
+                                <authentication-key when="{/vars/isis-auth-mode!='disabled'}">{/vars/isis-key-junos}</authentication-key>
+                                <authentication-type when="{/vars/isis-auth-mode!='disabled'}">md5</authentication-type>
+                                <wide-metrics-only/>
+                            </level>
+                            <level>
+                                <name>1</name>
+                                <authentication-key when="{/vars/isis-auth-mode!='disabled'}">{/vars/isis-key-junos}</authentication-key>
+                                <authentication-type when="{/vars/isis-auth-mode!='disabled'}">md5</authentication-type>
+                                <wide-metrics-only/>
+                            </level>
+                            <interface>
+                                <name>lo0.0</name>
+                                <passive>
+                                </passive>
+                            </interface>
+                            <source-packet-routing>
+                                <srgb>
+                                    <start-label>16000</start-label>
+                                    <index-range>10000</index-range>
+                                </srgb>
+                                <node-segment>
+                                    <ipv4-index>{/id}</ipv4-index>
+                                </node-segment>
+                            </source-packet-routing>
+                        </isis>
+                        <!-- <pim> -->
+                        <!--     <family> -->
+                        <!--         <inet> -->
+                        <!--             <disable/> -->
+                        <!--         </inet> -->
+                        <!--     </family> -->
+                        <!-- </pim> -->
+                        <mpls>
+                            <interface>
+                                <name>all</name>
+                            </interface>
+                        </mpls>
+                    </protocols>
+                    <routing-options>
+                        <router-id>{/vars/router-id}</router-id>
+                        <autonomous-system>
+                            <as-number>{/vars/asn}</as-number>
+                        </autonomous-system>
+                    </routing-options>
+                    <policy-options>
+                        <policy-statement>
+                            <name>REJECT</name>
+                            <term>
+                                <name>REJECT</name>
+                                <then>
+                                    <reject/>
+                                </then>
+                            </term>
+                        </policy-statement>
+
+                        <policy-statement>
+                            <name>IPV4-IBGP-EXPORT</name>
+                            <term>
+                                <name>DIRECT</name>
+                                <from>
+                                    <protocol>direct</protocol>
+                                </from>
+                                <then>
+                                    <accept/>
+                                </then>
+                            </term>
+                        </policy-statement>
+
+                        <prefix-list>
+                            <name>IPV6-MGMT</name>
+                            <!-- TODO FIXME
+                            <?foreach {/vars/mgmt-prefixes}?>
+                            <prefix-list-item>
+                                <name>{prefix}</name>
+                            </prefix-list-item>
+                            <?end?>
+                            -->
+                        </prefix-list>
+                        <prefix-list>
+                            <name>IPV4-EBGP-NEIGHBORS</name>
+                        </prefix-list>
+                        <prefix-list>
+                            <name>IPV4-EBGP-NEIGHBORS-GTSM255</name>
+                        </prefix-list>
+                        <prefix-list>
+                            <name>IPV4-IBGP-NEIGHBORS</name>
+                        </prefix-list>
+                        <prefix-list>
+                            <name>IPV6-EBGP-NEIGHBORS</name>
+                        </prefix-list>
+                        <prefix-list>
+                            <name>IPV6-EBGP-NEIGHBORS-GTSM255</name>
+                        </prefix-list>
+                        <prefix-list>
+                            <name>IPV6-IBGP-NEIGHBORS</name>
+                        </prefix-list>
+                        <prefix-list>
+                            <name>IPV6-DHCPV6-SERVERS</name>
+                        </prefix-list>
+                        <prefix-list>
+                            <name>IPV6-DNS-SERVERS</name>
+                        </prefix-list>
+                        <prefix-list>
+                            <name>IPV6-MGMT</name>
+                        </prefix-list>
+                        <prefix-list>
+                            <name>IPV6-NTP-SERVERS</name>
+                        </prefix-list>
+                    </policy-options>
+                </configuration>
+
+            </config>
+        </device>
+
+    </devices>
+</config-template>

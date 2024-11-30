@@ -1,0 +1,31 @@
+<ncs-package xmlns="http://tail-f.com/ns/ncs-packages">
+  <name>netinfra</name>
+  <package-version>1.0</package-version>
+  <description>Network Infrastructure CFS</description>
+  <ncs-min-version>6.2</ncs-min-version>
+
+  <required-package>
+    <name>resource-manager</name>
+  </required-package>
+
+  <component>
+    <name>router</name>
+    <application>
+      <python-class-name>netinfra.router.Main</python-class-name>
+    </application>
+  </component>
+
+  <component>
+    <name>backbone_link</name>
+    <application>
+      <python-class-name>netinfra.backbone_link.Main</python-class-name>
+    </application>
+  </component>
+
+  <component>
+    <name>ibgp_fullmesh</name>
+    <application>
+      <python-class-name>netinfra.ibgp_fullmesh.Main</python-class-name>
+    </application>
+  </component>
+</ncs-package>

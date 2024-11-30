@@ -1,0 +1,49 @@
+This package contains a generic action that can be used to perform service actions on multiple services.
+
+The requirement is that either a list of services or a presence-container service is defined in a container.
+The action in this package can then be imported and used under that container to perform service actions on all services in the list or the service in the presence-container.
+
+Actions are by default executed on all services defined under this container, with the depth of one. 
+Which services to call can be controlled by the 'services' leaf-list in the input of the action.
+This leaf-list must then be augmented into the input of the action.
+
+Example:
+
+```
+  container test-services {
+
+    uses multi-service-action:multi-service-actions {
+      augment "re-deploy/input" {
+        leaf-list services {
+          type leafref {
+            path "/test-service:test-services/test-service:test-service/test-service:name";
+          }
+        }
+      }
+      augment "check-sync/input" {
+        leaf-list services {
+          type leafref {
+            path "/test-service:test-services/test-service:test-service/test-service:name";
+          }
+        }
+      }
+    }
+
+    list test-service {
+      description "This is an RFS skeleton service";
+
+      key name;
+      leaf name {
+        tailf:info "Unique service id";
+        tailf:cli-allow-range;
+        type string;
+      }
+
+      uses ncs:service-data;
+      ncs:servicepoint test-service-servicepoint;
+
+    }
+  }
+  ```
+
+The makefile must also be updated, so that the yang file is included in the compilation of the package.

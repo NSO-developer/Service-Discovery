@@ -1,0 +1,14 @@
+--- /dev/fd/63	2024-10-07 11:38:20
++++ ../packages/netinfra-rfs/package-meta-data.xml	2024-10-07 11:38:00
+@@ -46,4 +46,11 @@
+     </application>
+   </component>
+ 
++  <component>
++    <name>rfs-ebgp-neighbor</name>
++    <application>
++      <python-class-name>netinfra_rfs.ebgp_neighbor.Main</python-class-name>
++    </application>
++  </component>
++
+ </ncs-package>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config xmlns="http://tail-f.com/ns/config/1.0">
+  <nodes xmlns="http://example.com/respnet/netinfra-rfs">
+    <router>
+      <name>CR-1</name>
+      <netsim>true</netsim>
+    </router>
+    <router>
+      <name>CR-2</name>
+      <netsim>true</netsim>
+    </router>
+    <router>
+      <name>CR-3</name>
+      <netsim>true</netsim>
+    </router>
+    <router>
+      <name>ER-1</name>
+      <netsim>true</netsim>
+    </router>
+    <router>
+      <name>ER-2</name>
+      <netsim>true</netsim>
+    </router>
+    <router>
+      <name>ER-3</name>
+      <netsim>true</netsim>
+    </router>
+  </nodes>
+</config>

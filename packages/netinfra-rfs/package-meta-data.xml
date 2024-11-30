@@ -1,0 +1,53 @@
+<ncs-package xmlns="http://tail-f.com/ns/ncs-packages">
+  <name>netinfra-rfs</name>
+  <package-version>1.0</package-version>
+  <description>Network Infrastructure RFS</description>
+  <ncs-min-version>6.2</ncs-min-version>
+
+  <required-package>
+    <name>multi-service-action</name>
+  </required-package>
+
+  <component>
+    <name>base-config</name>
+    <application>
+      <python-class-name>netinfra_rfs.base_config.Main</python-class-name>
+    </application>
+  </component>
+
+  <component>
+    <name>backbone-interface</name>
+    <application>
+      <python-class-name>netinfra_rfs.backbone_interface.Main</python-class-name>
+    </application>
+  </component>
+
+  <component>
+    <name>ibgp-neighbor</name>
+    <application>
+      <python-class-name>netinfra_rfs.ibgp_neighbor.Main</python-class-name>
+    </application>
+  </component>
+
+  <component>
+    <name>nodes-router</name>
+    <application>
+      <python-class-name>netinfra_rfs.nodes_router.Main</python-class-name>
+    </application>
+  </component>
+
+  <component>
+    <name>rfs-vrf</name>
+    <application>
+      <python-class-name>netinfra_rfs.vrf.Main</python-class-name>
+    </application>
+  </component>
+
+  <component>
+    <name>rfs-vrf-interface</name>
+    <application>
+      <python-class-name>netinfra_rfs.vrf_interface.Main</python-class-name>
+    </application>
+  </component>
+
+</ncs-package>
