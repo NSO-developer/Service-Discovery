@@ -51,7 +51,7 @@ utilizing NSO as a language for network service APIs.
 ## Assumptions
 
 This tutorial is scoped by the following assumptions:
-- The service discovery is run in separate system from the production environment, but with access to the network.
+- The service discovery is run in separate system from the production environment.
 - Each service instance touches a single network device.
 - All services are implemented with a single device type and version.
 - The NED have full support for the service(s) to be discovered.
