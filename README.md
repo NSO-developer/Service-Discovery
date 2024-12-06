@@ -234,6 +234,15 @@ desired and actual network configurations are identified and resolved.
 
 ## Setup
 
+### Dependencies
+The tutorial requires the use of the Resource Manager package and the
+Juniper-Junos NED. To execute the tutorial successfully, these packages must
+be placed within the packages directory.
+
+Versions that the tutorial supports:
+resource-manager: 4.2.8
+juniper-junos: 4.16.2
+
 ### Build and start
 
 ````
