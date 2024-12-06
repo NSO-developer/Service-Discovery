@@ -207,8 +207,10 @@ tutorial-sd-21-rebuild:
 
 # Now let's rerun the whole config coverage and diff check on ER-1 to see if we
 # properly read back the MTU.... and it does, yay!
-# Note that there is a diff showing us that our disovered services will set the mtu to 1500 on eth4.
-# Since this is the default value, the diff can be ignored. Or even better explicitly configured on the 
+# Note that there is a diff showing us that our disovered services will set the 
+# mtu to 1500 on eth4.
+# Since this is the default value, the diff can be ignored. Or even better 
+# explicitly configured on the 
 # device manually, to remove it from the diff. We will simply ignore it for now.
 tutorial-sd-22-find-services-er-1:
 	@$(MAKE) runcmdJ CMD="request devices device ER-1 sync-from"
