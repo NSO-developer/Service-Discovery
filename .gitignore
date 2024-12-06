@@ -1,0 +1,8 @@
+packages/juniper-junos-nc-4.16/
+packages/resource-manager/
+config/
+ncs-run/
+netsim/
+netsim_init.xml
+.pylint.d
+load-dir
