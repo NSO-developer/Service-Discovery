@@ -24,9 +24,9 @@ class ServiceCallbacks(Service):
                 username=tctx.username,
                 pool_name='router-id',
                 allocation_name=service.name,
-                sync=False,
+                sync_pool=False,
                 requested_id=service.custom.id if service.custom.id else -1,
-                alloc_sync=True,
+                sync_alloc=True,
                 root=root)
 
         id = id_read(username=tctx.username,
@@ -43,7 +43,7 @@ class ServiceCallbacks(Service):
                     allocation_name=service.name,
                     subnet_start_ip=service.custom.ipv4_address,
                     cidrmask=32,
-                    sync=True,
+                    sync_alloc=True,
                     root=root)
         else:
             net_request(service=service,
@@ -52,7 +52,7 @@ class ServiceCallbacks(Service):
                         pool_name='ipv4-loopback',
                         allocation_name=service.name,
                         cidrmask=32,
-                        sync=True,
+                        sync_alloc=True,
                         root=root)
 
         ipv4_loopback = net_read(username=tctx.username,

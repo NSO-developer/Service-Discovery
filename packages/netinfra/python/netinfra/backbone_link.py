@@ -25,7 +25,7 @@ class CreateRfs(NanoService):
                     allocation_name=ALLOCATION_NAME,
                     subnet_start_ip=service.custom.ipv4_prefix.split('/')[0],
                     cidrmask=service.custom.ipv4_prefix.split('/')[1],
-                    sync=True,
+                    sync_alloc=True,
                     root=root)
         else:
             net_request(service=service,
@@ -34,7 +34,7 @@ class CreateRfs(NanoService):
                         pool_name='ipv4-backbone-link',
                         allocation_name=ALLOCATION_NAME,
                         cidrmask=31,
-                        sync=True,
+                        sync_alloc=True,
                         root=root)
 
         service.vars.ipv4_prefix = net_read(username=tctx.username,
@@ -49,7 +49,7 @@ class CreateRfs(NanoService):
                     allocation_name=ALLOCATION_NAME,
                     subnet_start_ip=service.custom.ipv6_prefix.split('/')[0],
                     cidrmask=service.custom.ipv6_prefix.split('/')[1],
-                    sync=True,
+                    sync_alloc=True,
                     root=root)
         else:
             net_request(service=service,
@@ -58,7 +58,7 @@ class CreateRfs(NanoService):
                         pool_name='ipv6-backbone-link',
                         allocation_name=ALLOCATION_NAME,
                         cidrmask=126,
-                        sync=True,
+                        sync_alloc=True,
                         root=root)
 
         service.vars.ipv6_prefix = net_read(username=tctx.username,
